@@ -11,16 +11,25 @@ function findCheapestPrice(n: number, flights: number[][], src: number, dst: num
 
     const pq = new MinHeap<number[]>(([weight, _node, _count]) => weight, [[0, src, 0]])
 
+    const best = Array.from({ length: n }, () => Array(k + 2).fill(Infinity))
+    best[0][0] = 0
+
     while (pq.size()) {
         const [weight, node, count] = pq.pop()!
 
-        if (count <= k + 1 && node === dst) return weight
+        if (count > k + 1) continue
+
+        if (weight > best[node][count]) continue
+
+        if (node === dst) return weight
 
         for (const [chWeight, ch] of graph.get(node)!) {
             const nextWeight = weight + chWeight
+            const nextCount = count + 1
 
-            if (count <= k && weight < nextWeight) {
+            if (best[ch][nextCount] > nextWeight) {
                 pq.push([nextWeight, ch, count + 1])
+                best[ch][nextCount] = nextWeight
             }
         }
     }
@@ -41,3 +50,9 @@ console.log(findCheapestPrice(
     3,
     2
 ))
+
+/*
+Time complexity: O(V*log(V))
+
+Space complexity: O(V + E)
+*/
